@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const careerRoutes = require('./routes/careerRoutes'); // ✅ Career Routes
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Load environment variables
@@ -29,7 +30,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // ✅ Enhanced CORS configuration
 const corsOptions = {
   origin: ["http://localhost:3000", "http://localhost:1000"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Added PUT and other methods
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
   preflightContinue: false,
@@ -50,6 +51,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/ai", aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/career', careerRoutes); // ✅ FIXED: Now matches frontend request
 
 // Error Handling Middleware
 app.use(notFound);

@@ -12,7 +12,7 @@ if (!GEMINI_API_KEY) {
   console.error("❌ Error: Missing GEMINI_API_KEY in environment variables.");
 }
 
-// ✅ Route: Generate Learning Path
+// ✅ Route: Generate Learning Path             
 router.post("/learning-path", async (req, res) => {
   try {
     let { userId, topic, level, duration } = req.body;

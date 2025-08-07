@@ -7,10 +7,12 @@ const CareerPathHistory = require("../models/CareerPathHistory");
 const User = require("../models/User");
 
 dotenv.config();
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const NVIDIA_NIM_API_KEY = process.env.NVIDIA_NIM_API_KEY;
+const NIM_MODEL = "meta/llama-4-maverick-17b-128e-instruct";
+const NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
-if (!GEMINI_API_KEY) {
-  console.error("❌ Error: Missing GEMINI_API_KEY in environment variables.");
+if (!NVIDIA_NIM_API_KEY) {
+  console.error("❌ Error: Missing NVIDIA_NIM_API_KEY in environment variables.");
 }
 
 // Apply authentication to all career routes
@@ -27,19 +29,25 @@ router.post("/generate", async (req, res) => {
     const interests = user.interests?.length ? user.interests.join(", ") : "Not specified";
     const achievements = user.achievements?.length ? user.achievements.join(", ") : "None";
 
-    const prompt = `Generate a career path based on:
-      Skills - ${skills},
-      Interests - ${interests},
-      Achievements - ${achievements}.
-      Provide a detailed career path with future Trends.`;
+    const prompt = `Generate a career path based on:\n  Skills - ${skills},\n  Interests - ${interests},\n  Achievements - ${achievements}.\n  Provide a detailed career path with future Trends.`;
 
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-002:generateContent?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: prompt }] }] },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    const payload = {
+      model: NIM_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 512,
+      temperature: 1.0,
+      top_p: 1.0,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      stream: false
+    };
+    const headers = {
+      "Authorization": `Bearer ${NVIDIA_NIM_API_KEY}`,
+      "Accept": "application/json"
+    };
+    const response = await axios.post(NIM_URL, payload, { headers });
 
-    const responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+    const responseText = response.data?.choices?.[0]?.message?.content || "No response received.";
     
     // Add personalized greeting
     const userName = user.name || 'there';
